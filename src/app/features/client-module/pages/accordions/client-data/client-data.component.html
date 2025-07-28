@@ -1,0 +1,105 @@
+<mat-accordion>
+  <!-- Client Data Section -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Client Data</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form class="section-form">
+      <div class="checkbox-row">
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Membership Number</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseMembershipNumber" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Policy Lookup</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UsePolicyLookup" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use External File</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseExternalFile" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Web Validation</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseWebValidation" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Web Validation AVS</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseWebValidationAVS" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Other Validation</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseOtherValidation" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Text Export</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseTextExport" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="form-group is-active-group">
+          <label class="toggle-label">Use Web Validation OTH</label>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="UseWebValidationOTH" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <!-- Policy File -->
+        <div class="form-field">
+          <label for="policyFile" class="form-label">Policy File</label>
+          <ng-select
+            [items]="policyFiles"
+            bindLabel="label"
+            bindValue="value"
+            placeholder="Select"
+            [searchable]="true"
+            [clearable]="true"
+            [(ngModel)]="selectedValue"
+            class="custom-select-style"
+          >
+          </ng-select>
+        </div>
+
+        <!-- Policy Lookup Path -->
+        <div class="form-field">
+          <label for="lookupPath" class="form-label">Policy Lookup Path</label>
+          <input type="text" id="lookupPath" class="form-input" />
+        </div>
+
+        <!-- Validation URL -->
+        <div class="form-field">
+          <label for="validationUrl" class="form-label">Validation URL</label>
+          <input type="text" id="validationUrl" class="form-input" />
+        </div>
+
+        <!-- Notes -->
+        <div class="form-field full-width">
+          <label for="notes" class="form-label">Notes</label>
+          <textarea id="notes" class="form-textarea" rows="4"></textarea>
+        </div>
+      </div>
+    </form>
+  </mat-expansion-panel>
+</mat-accordion>

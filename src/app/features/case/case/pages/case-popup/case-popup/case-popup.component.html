@@ -1,0 +1,34 @@
+<!-- Popup HTML -->
+<div class="overlay">
+  <div class="form-wrapper">
+    <div class="popup-header">
+      <h3 class="popup-title"><i class="fas fa-edit"></i> Create a New Call</h3>
+      <button class="close-btn" type="button" (click)="onClose()">×</button>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="clientName"
+          >Client Name <span class="required">*</span></label
+        >
+        <select id="clientName" [(ngModel)]="clientName" name="clientName">
+          <option [value]="'1Life-Agency1'">1Life-Agency1</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="serviceType"
+          >Service<span class="required">*</span></label
+        >
+        <select id="serviceType" [(ngModel)]="serviceType" name="serviceType">
+          <option [value]="'AFS-Funeral Packages'">AFS-Funeral Packages</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn">
+      <button class="btn-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-save" (click)="onSave()">Save</button>
+    </div>
+  </div>
+</div>

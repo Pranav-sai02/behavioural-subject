@@ -1,0 +1,115 @@
+<div class="overlay">
+  <div class="popup-container" [formGroup]="providerForm">
+    <!-- Header -->
+    <div class="popup-header">
+      <h2 class="modal-title">
+        <i class="fas fa-edit"></i> Add New Claim Center
+      </h2>
+      <button class="close-btn" type="button" (click)="onClose()">✖</button>
+    </div>
+
+    <!-- Form Rows -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" formControlName="Name" />
+      </div>
+      <div class="form-group">
+        <label>Client Group</label>
+        <select formControlName="ClientGroupId">
+          <option value="">-- Select Client Group --</option>
+          <option
+            *ngFor="let group of clientGroups"
+            [value]="group.ClientGroupId"
+          >
+            {{ group.Name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Branch</label>
+        <input type="text" formControlName="Branch" />
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea rows="2" formControlName="Address"></textarea>
+      </div>
+    </div>
+
+    <!-- 📞 Telephone and Fax Row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Telephone</label>
+        <ngx-intl-tel-input
+          [cssClass]="'custom'"
+          [preferredCountries]="[
+            CountryISO.UnitedStates,
+            CountryISO.UnitedKingdom
+          ]"
+          [enablePlaceholder]="true"
+          [searchCountryFlag]="true"
+          [separateDialCode]="true"
+          [searchCountryField]="searchFields"
+          [selectFirstCountry]="false"
+          [selectedCountryISO]="CountryISO.SouthAfrica"
+          [phoneValidation]="true"
+          name="Telephone"
+          formControlName="Telephone"
+        ></ngx-intl-tel-input>
+      </div>
+      <div class="form-group">
+        <label>Fax</label>
+        <ngx-intl-tel-input
+          [cssClass]="'custom'"
+          [preferredCountries]="[
+            CountryISO.UnitedStates,
+            CountryISO.UnitedKingdom
+          ]"
+          [enablePlaceholder]="true"
+          [searchCountryFlag]="true"
+          [separateDialCode]="true"
+          [searchCountryField]="searchFields"
+          [selectFirstCountry]="false"
+          [selectedCountryISO]="CountryISO.SouthAfrica"
+          [phoneValidation]="true"
+          name="Fax"
+          formControlName="Fax"
+        ></ngx-intl-tel-input>
+      </div>
+    </div>
+
+    <!-- Town/City and Province -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Town/City</label>
+        <input type="text" formControlName="TownCity" />
+      </div>
+      <div class="form-group">
+        <label>Province</label>
+        <select formControlName="Province">
+          <option value="">-- Select Province --</option>
+          <option *ngFor="let province of provinces" [value]="province">
+            {{ province }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group checkbox-wrapper1">
+        <label>
+          <input type="checkbox" formControlName="IsActive" />
+          Is Active?
+        </label>
+      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="form-actions">
+      <button class="save-btn" type="button" (click)="onSubmit()">Save</button>
+    </div>
+  </div>
+</div>

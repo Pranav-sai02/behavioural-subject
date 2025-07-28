@@ -1,0 +1,240 @@
+<div class="ag-theme-alpine" style="height: 500px; width: 100%">
+  <ag-grid-angular
+    class="ag-grid-responsive"
+    [rowData]="users"
+    [pagination]="true"
+    [paginationPageSize]="20"
+    [columnDefs]="columnDefs"
+    [defaultColDef]="defaultColDef"
+    rowSelection="single"
+    [animateRows]="true"
+    [domLayout]="'autoHeight'"
+    [components]="{
+      activeToggleRenderer: ActiveToggleRendererComponent,
+      softDeleteRenderer: SoftDeleteRendererComponent,
+      viewButtonRenderer: ViewButtonRendererComponent
+    }"
+    (gridReady)="onGridReady($event)"
+  >
+  </ag-grid-angular>
+</div>
+
+<!-- ========= EDIT POP‑UP ========= -->
+<div class="popup-overlay" *ngIf="selectedUser">
+  <div class="modal-content">
+    <!-- HEADER TITLE -->
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Update User</h2>
+      <button class="close-btn" (click)="closePopup()">✖</button>
+    </div>
+
+    <!-- Profile picture -->
+    <div class="modal-body">
+      <div class="profile-picture-section">
+        <div class="profile-image-wrapper">
+          <img
+            [src]="editedUser.ProfileImage || defaultImage"
+            alt="Profile Image"
+          />
+          <div class="camera-overlay" (click)="toggleOptions = !toggleOptions">
+            <i class="fa fa-camera"></i>
+          </div>
+        </div>
+
+        <!-- picture actions -->
+        <div class="image-options" *ngIf="toggleOptions">
+          <button
+            class="close-popup-btn"
+            type="button"
+            (click)="toggleOptions = false"
+          >
+            ×
+          </button>
+          <div (click)="fileInput.click()">Choose from Gallery</div>
+          <div (click)="openCamera()">Take Photo</div>
+          <div
+            (click)="removeImage()"
+            [class.disabled]="!editedUser.ProfileImage"
+          >
+            Remove Photo
+          </div>
+        </div>
+      </div>
+      <input
+        type="file"
+        #fileInput
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    <!-- ======== FORM ======== -->
+    <form #f="ngForm" (ngSubmit)="f.valid && updateUser()">
+      <!-- row‑1 -->
+      <div class="form-row">
+        <div class="form-group input-container">
+          <label>First Name <span class="required">*</span></label>
+          <input
+            type="text"
+            name="Firstname"
+            required
+            [(ngModel)]="editedUser.Firstname"
+            placeholder="Enter First Name"
+            #firstname="ngModel"
+          />
+          <span
+            class="clear-icon"
+            *ngIf="editedUser.Firstname"
+            (click)="clearField('Firstname')"
+            >&#10005;</span
+          >
+          <div *ngIf="firstname.invalid && firstname.touched" class="error-msg">
+            First Name is required.
+          </div>
+        </div>
+
+        <div class="form-group input-container">
+          <label>Last Name <span class="required">*</span></label>
+          <input
+            type="text"
+            name="Lastname"
+            required
+            [(ngModel)]="editedUser.Lastname"
+            placeholder="Enter Last Name"
+            #lastname="ngModel"
+          />
+          <span
+            class="clear-icon"
+            *ngIf="editedUser.Lastname"
+            (click)="clearField('Lastname')"
+            >&#10005;</span
+          >
+          <div *ngIf="lastname.invalid && lastname.touched" class="error-msg">
+            Last Name is required.
+          </div>
+        </div>
+      </div>
+
+      <!-- row‑2 -->
+      <div class="form-row">
+        <div class="form-group input-container">
+          <label>Email <span class="required">*</span></label>
+          <input
+            type="email"
+            name="UserEmail"
+            required
+            [(ngModel)]="editedUser.UserEmail"
+            placeholder="Enter Email"
+            #userEmail="ngModel"
+          />
+          <div *ngIf="userEmail.invalid && userEmail.touched" class="error-msg">
+            <div *ngIf="userEmail.errors?.['required']">Email is required.</div>
+            <div *ngIf="userEmail.errors?.['email']">
+              Please enter a valid email.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group input-container">
+          <label>Employee ID</label>
+          <input
+            type="text"
+            name="EmployeeId"
+            [(ngModel)]="editedUser.EmployeeId"
+            placeholder="Enter Employee ID"
+          />
+          <span
+            class="clear-icon"
+            *ngIf="editedUser.EmployeeId"
+            (click)="clearField('EmployeeId')"
+            >&#10005;</span
+          >
+        </div>
+      </div>
+
+      <!-- row‑3 -->
+      <div class="form-row">
+        <div class="form-group input-container">
+          <label>Phone Number</label>
+          <input
+            type="text"
+            name="PhoneNumber"
+            [(ngModel)]="editedUser.PhoneNumber"
+            placeholder="Enter Phone Number"
+          />
+          <span
+            class="clear-icon"
+            *ngIf="editedUser.PhoneNumber"
+            (click)="clearField('PhoneNumber')"
+            >&#10005;</span
+          >
+        </div>
+
+        <div class="form-group input-container">
+          <label>Mobile Number <span class="required">*</span></label>
+          <input
+            type="text"
+            name="MobileNumber"
+            required
+            [(ngModel)]="editedUser.MobileNumber"
+            placeholder="Enter Mobile Number"
+            #mobileNumber="ngModel"
+            pattern="^[0-9]{10}$"
+          />
+          <span
+            class="clear-icon"
+            *ngIf="editedUser.MobileNumber"
+            (click)="clearField('MobileNumber')"
+            >&#10005;</span
+          >
+          <div
+            *ngIf="mobileNumber.invalid && mobileNumber.touched"
+            class="error-msg"
+          >
+            <div *ngIf="mobileNumber.errors?.['required']">
+              Mobile Number is required.
+            </div>
+            <div *ngIf="mobileNumber.errors?.['pattern']">
+              Mobile Number must be 10 digits.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Is Active checkbox -->
+      <div class="toggle-row">
+        <label class="toggle-label">Is Active?</label>
+        <label class="switch">
+          <input
+            type="checkbox"
+            name="IsActive"
+            [(ngModel)]="editedUser.IsActive"
+          />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label">Is Admin?</label>
+        <label class="switch">
+          <input
+            type="checkbox"
+            name="IsAdmin"
+            [(ngModel)]="editedUser.IsAdmin"
+          />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" [disabled]="saving">
+          <ng-container *ngIf="!saving">Update</ng-container>
+          <ng-container *ngIf="saving">
+            <i class="fa fa-spinner fa-spin"></i> Saving…
+          </ng-container>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
