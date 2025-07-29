@@ -70,13 +70,13 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
     private spSvc: ServicesPageService,
     private toastr: ToastrService,
     private tabState: TabStateService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subs.add(
-      this.tabState.getServices().subscribe(state => {
-        if (state.ClientService?.length) {
-          this.rows = this.mapToServiceRow(state.ClientService);
+      this.tabState.getServices().subscribe((services: ApiClientService[]) => {
+        if (services?.length) {
+          this.rows = this.mapToServiceRow(services);
         } else {
           this.loadServices();
         }
@@ -92,9 +92,8 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
     this.spSvc.getAllServices().subscribe({
       next: (data: ServicesPage[]) => {
         this.rows = this.mapFromServicesPage(data);
-        this.tabState.updateServices({
-          ClientService: this.mapToClientService(this.rows)
-        });
+        this.tabState.updateServices(this.mapToClientService(this.rows));
+
       },
       error: err => {
         console.error('Failed to load services:', err);
@@ -109,19 +108,16 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
   }
 
   softDelete(svc: ServiceRow): void {
-    svc.IsDeleted = true;
     this.rows = this.rows.filter(r => r.ServiceId !== svc.ServiceId);
-    this.tabState.updateServices({
-      ClientService: this.mapToClientService(this.rows)
-    });
-    this.toastr.show('Removed successfully', 'success');
+    this.tabState.updateServices(this.mapToClientService(this.rows));
+
+    this.toastr.show('Service removed successfully', 'success');
   }
 
   onServiceLinked(newSvc: ServiceRow): void {
     this.rows = [...this.rows, newSvc];
-    this.tabState.updateServices({
-      ClientService: this.mapToClientService(this.rows)
-    });
+    this.tabState.updateServices(this.mapToClientService(this.rows));
+
     this.showPopup = false;
     this.toastr.show('Service linked successfully', 'success');
   }
@@ -132,8 +128,8 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
       ClientServiceId: 0,
       ClientId: this.clientId || 0,
       ServiceId: r.ServiceId,
-      Note: '',
-      TransferNumber: '',
+      Note: r.Description,   // Use Description as Note
+      TransferNumber: '',    // Dummy for now
       ServiceDto: {
         ServiceId: r.ServiceId,
         Description: r.Description
@@ -145,12 +141,12 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
   private mapToServiceRow(cs: ApiClientService[]): ServiceRow[] {
     return cs.map(c => ({
       ServiceId: c.ServiceDto.ServiceId,
-      Description: c.ServiceDto.Description,
+      Description: c.Note || '', // Note is shown as Description
       IsDeleted: false
     }));
   }
 
-  /** Convert ServicesPage[] (API) → ServiceRow[] */
+  /** Convert ServicesPage[] → ServiceRow[] */
   private mapFromServicesPage(sp: ServicesPage[]): ServiceRow[] {
     return sp.map(s => ({
       ServiceId: s.ServiceId,

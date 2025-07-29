@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ClientService } from '../../../services/client-services/client.service';
 import { ClientGroup } from '../../../models/ClientGroup';
 import { ClientGroupService } from '../../../services/client-group-services/client-group.service';
+import { TabStateService } from '../../../services/tabs-behavioural-service/tabState.service';
 
 @Component({
   selector: 'app-company-information',
@@ -18,7 +19,7 @@ import { ClientGroupService } from '../../../services/client-group-services/clie
   styleUrl: './company-information.component.css',
 })
 export class CompanyInformationComponent {
-  selectedValue: number | null = null;
+    selectedValue: number | null = null;
   separateDialCode = false;
   SearchCountryField = SearchCountryField;
   CountryISO = CountryISO;
@@ -38,13 +39,10 @@ export class CompanyInformationComponent {
   @Input() isEditMode: boolean = false;
 
   clientGroup: ClientGroup[] = [];
-
-
-
   clientForm!: FormGroup;
   showSuccess = false;
-
   ProfileImage: String | ArrayBuffer | null = null;
+
   defaultImage =
     'https://static.vecteezy.com/system/resources/thumbnails/023/329/367/small/beautiful-image-in-nature-of-monarch-butterfly-on-lantana-flower-generative-ai-photo.jpg';
 
@@ -53,46 +51,46 @@ export class CompanyInformationComponent {
   constructor(
     private fb: FormBuilder,
     private toastr: ToastrService,
-    private clientService: ClientService,
-    private clientGroupService: ClientGroupService
+    private clientGroupService: ClientGroupService,
+    private tabState: TabStateService
   ) {}
 
   ngOnInit(): void {
-  this.clientForm = this.fb.group({
-    CompanyName: [this.clientToEdit?.ClientName || '', Validators.required],
-    ClientGroupId: [this.clientToEdit?.ClientGroupId || null, Validators.required],
-    Address: [this.clientToEdit?.Address || ''],
-    // AreaCode: [this.clientToEdit?.AreaCodes?.AreaCode || '', Validators.required],
-    Telephone: [this.clientToEdit?.Tel || '', Validators.required],
-    Fax: [this.clientToEdit?.Fax || ''],
-    Mobile: [this.clientToEdit?.Mobile || '', Validators.required],
-    WebURL: [
-      this.clientToEdit?.WebURL || '',
-      Validators.pattern(
-        /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i
-      ),
-    ],
-    CompanyLogo: [this.clientToEdit?.CompanyLogo || ''],
-    IsActive: [this.clientToEdit?.IsActive ?? true],
-    canEditAddress: [false]
-  });
+    this.clientForm = this.fb.group({
+      CompanyName: [this.clientToEdit?.ClientName || '', Validators.required],
+      ClientGroupId: [
+        this.clientToEdit?.ClientGroupId || null,
+        Validators.required,
+      ],
+      Address: [this.clientToEdit?.Address || ''],
+      Telephone: [this.clientToEdit?.Tel || '', Validators.required],
+      Fax: [this.clientToEdit?.Fax || ''],
+      Mobile: [this.clientToEdit?.Mobile || '', Validators.required],
+      WebURL: [
+        this.clientToEdit?.WebURL || '',
+        Validators.pattern(
+          /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i
+        ),
+      ],
+      CompanyLogo: [this.clientToEdit?.CompanyLogo || ''],
+      IsActive: [this.clientToEdit?.IsActive ?? true],
+      canEditAddress: [false],
+    });
 
-  // ✅ Load Client Groups
-  this.clientGroupService.getClientGroups().subscribe({
-    next: (groups) => {
-      this.clientGroup = groups;
-      console.log('Client groups loaded:', this.clientGroup);
-    },
-    error: (err) => {
-      console.error('Failed to load client groups:', err);
+    // Load Client Groups
+    this.clientGroupService.getClientGroups().subscribe({
+      next: (groups) => {
+        this.clientGroup = groups;
+      },
+      error: (err) => {
+        console.error('Failed to load client groups:', err);
+      },
+    });
+
+    if (this.clientToEdit?.CompanyLogo) {
+      this.ProfileImage = this.clientToEdit.CompanyLogo;
     }
-  });
-
-  if (this.clientToEdit?.CompanyLogo) {
-    this.ProfileImage = this.clientToEdit.CompanyLogo;
   }
-}
-
 
   closeForm() {
     this.close.emit();
@@ -134,122 +132,68 @@ export class CompanyInformationComponent {
     console.log('Edit button clicked');
   }
 
-  onSave() {
+  /**
+   * Save updates into TabStateService with safe defaults
+   */
+  onSave(): void {
     if (this.clientForm.valid) {
       const formValues = this.clientForm.value;
 
-      const client: Client = {
-        ...this.clientToEdit,
+      this.tabState.updateDetails({
         ClientName: formValues.CompanyName,
-        ClientGroup: { Name: formValues.ClientGroup } as any,
-        Address: formValues.Address,
-        // AreaCodes: { AreaCode: formValues.AreaCode } as any,
-        Tel: formValues.Telephone,
-        Fax: formValues.Fax,
-        Mobile: formValues.Mobile,
-        WebURL: formValues.WebURL,
-        CompanyLogo: formValues.CompanyLogo,
-        IsActive: formValues.IsActive,
         PrintName: formValues.CompanyName,
+        ClientGroupId: formValues.ClientGroupId || 1,
+        Address: formValues.Address || '123 Dummy Street',
+        Tel: formValues.Telephone || '123-456-7890',
+        Fax: formValues.Fax || '',
+        Mobile: formValues.Mobile || '9876543210',
+        WebURL: formValues.WebURL || 'https://example.com',
+        CompanyLogo: formValues.CompanyLogo || '',
+        IsActive: formValues.IsActive ?? true,
 
-        // Optional or reused properties
-        ClientId: this.clientToEdit?.ClientId ?? 0,
-        ClientGroupId: this.clientToEdit?.ClientGroupId ?? 0,
-        ClaimFormDeclaration: null,
-        ClaimFormDeclarationPlain: null,
+        // Additional required fields with defaults
+        ClaimsManager: '',
+        ClaimFormDeclaration: '',
+        ClaimFormDeclarationPlain: '',
         Code: '',
-        CompanyLogoData: null,
-        DoTextExport: false,
-        NearestClaimCentre: false,
-        OtherValidationNotes: null,
+        CompanyLogoData: '',
+        DoTextExport: true,
+        NearestClaimCentre: true,
+        OtherValidationNotes: '',
         PolicyFile: '',
         PolicyLabel: '',
-        PolicyLookup: false,
-        PolicyLookupFileData: null,
-        PolicyLookupFileName: null,
-        PolicyLookupPath: null,
-        ProcessClaims: false,
-        UseMembershipNumber: false,
-        Validate: false,
-        ValidationExternalFile: false,
-        ValidationLabel1: null,
-        ValidationLabel2: null,
-        ValidationLabel3: null,
-        ValidationLabel4: null,
-        ValidationLabel5: null,
-        ValidationLabel6: null,
-        ValidationOther: false,
-        ValidationWeb: false,
-        WebValidationAVS: false,
-        WebValidationOTH: false,
+        PolicyLookup: true,
+        PolicyLookupFileData: '',
+        PolicyLookupFileName: '',
+        PolicyLookupPath: '',
+        ProcessClaims: true,
+        UseMembershipNumber: true,
+        Validate: true,
+        ValidationExternalFile: true,
+        ValidationLabel1: '',
+        ValidationLabel2: '',
+        ValidationLabel3: '',
+        ValidationLabel4: '',
+        ValidationLabel5: '',
+        ValidationLabel6: '',
+        ValidationOther: true,
+        ValidationWeb: true,
+        WebValidationAVS: true,
+        WebValidationOTH: true,
         WebValidationURL: '',
-        EnableVoucherExportOnDeathClaim: false,
-      };
-
-      const request$ =
-        client.ClientId && client.ClientId !== 0
-          ? this.clientService.updateClient(client.ClientId, client)
-          : this.clientService.createClient(client);
-
-      request$.subscribe({
-        next: () => {
-          this.toastr.success(
-            `Client ${client.ClientId ? 'updated' : 'created'} successfully!`,
-            'Success'
-          );
-          this.showSuccess = true;
-          setTimeout(() => {
-            this.showSuccess = false;
-            this.closeForm();
-          }, 3000);
-        },
-        error: (err) => {
-          const errors = err?.error?.errors;
-          if (errors) {
-            const messages = Object.values(errors).flat().join('<br/>');
-            this.toastr.error(messages, 'Validation Error', {
-              enableHtml: true,
-            });
-          } else {
-            this.toastr.error(
-              err?.error?.message || 'Failed to save client',
-              'Error'
-            );
-          }
-        },
+        EnableVoucherExportOnDeathClaim: true,
       });
+
+      this.toastr.success('Company details updated in Tab State', 'Success');
     } else {
       this.clientForm.markAllAsTouched();
-
-      const errors: string[] = [];
-
-      const nameControl = this.clientForm.get('CompanyName');
-      const mobileControl = this.clientForm.get('Mobile');
-      const phoneControl = this.clientForm.get('Telephone');
-      const webControl = this.clientForm.get('WebURL');
-
-      if (nameControl?.hasError('required')) {
-        errors.push('Company Name is required.');
-      }
-      if (mobileControl?.hasError('required')) {
-        errors.push('Mobile Number is required.');
-      }
-      if (phoneControl?.hasError('required')) {
-        errors.push('Phone Number is required.');
-      }
-      if (webControl?.hasError('pattern')) {
-        errors.push('Invalid Web URL.');
-      }
-
-      this.toastr.error(errors.join('<br/>'), 'Validation Error', {
-        enableHtml: true,
-      });
+      this.toastr.error('Please fix validation errors before saving.', 'Error');
     }
   }
 
   dropdownOptions = [
-  { label: 'Option 1', value: 1 },
-  { label: 'Option 2', value: 2 },
-  { label: 'Option 3', value: 3 },
-];
+    { label: 'Option 1', value: 1 },
+    { label: 'Option 2', value: 2 },
+    { label: 'Option 3', value: 3 },
+  ];
 }
