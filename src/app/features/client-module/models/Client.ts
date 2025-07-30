@@ -80,7 +80,7 @@ export interface ClientService {
   ServiceId: number;
   Note: string;
   TransferNumber: string;
-  ServiceDto: ServiceDto;
+  ServiceDto?: ServiceDto;
 }
 
 export interface RatingQuestionType {

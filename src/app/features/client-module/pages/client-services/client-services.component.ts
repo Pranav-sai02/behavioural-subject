@@ -70,7 +70,7 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
     private spSvc: ServicesPageService,
     private toastr: ToastrService,
     private tabState: TabStateService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.subs.add(
@@ -93,9 +93,8 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
       next: (data: ServicesPage[]) => {
         this.rows = this.mapFromServicesPage(data);
         this.tabState.updateServices(this.mapToClientService(this.rows));
-
       },
-      error: err => {
+      error: (err) => {
         console.error('Failed to load services:', err);
         this.toastr.show('Failed to load services. Try again.', 'error');
       }
@@ -104,11 +103,11 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
 
   onGridReady(ev: GridReadyEvent): void {
     this.gridApi = ev.api;
-    this.gridApi.setGridOption('rowData', this.rows); // cast to any for compatibility
+    this.gridApi.setGridOption('rowData', this.rows);
   }
 
   softDelete(svc: ServiceRow): void {
-    this.rows = this.rows.filter(r => r.ServiceId !== svc.ServiceId);
+    this.rows = this.rows.filter((r) => r.ServiceId !== svc.ServiceId);
     this.tabState.updateServices(this.mapToClientService(this.rows));
 
     this.toastr.show('Service removed successfully', 'success');
@@ -122,33 +121,30 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
     this.toastr.show('Service linked successfully', 'success');
   }
 
-  /** Convert ServiceRow[] → ClientService[] */
+  /** Convert ServiceRow[] → ClientService[] (No ServiceDto) */
   private mapToClientService(rows: ServiceRow[]): ApiClientService[] {
-    return rows.map(r => ({
+    return rows.map((r) => ({
       ClientServiceId: 0,
       ClientId: this.clientId || 0,
       ServiceId: r.ServiceId,
-      Note: r.Description,   // Use Description as Note
-      TransferNumber: '',    // Dummy for now
-      ServiceDto: {
-        ServiceId: r.ServiceId,
-        Description: r.Description
-      }
+      Note: r.Description,
+      TransferNumber: ''
+      // ServiceDto removed
     }));
   }
 
-  /** Convert ClientService[] → ServiceRow[] */
+  /** Convert ClientService[] → ServiceRow[] (Use ServiceId + Note only) */
   private mapToServiceRow(cs: ApiClientService[]): ServiceRow[] {
-    return cs.map(c => ({
-      ServiceId: c.ServiceDto.ServiceId,
-      Description: c.Note || '', // Note is shown as Description
+    return cs.map((c) => ({
+      ServiceId: c.ServiceId, // No ServiceDto
+      Description: c.Note || '',
       IsDeleted: false
     }));
   }
 
   /** Convert ServicesPage[] → ServiceRow[] */
   private mapFromServicesPage(sp: ServicesPage[]): ServiceRow[] {
-    return sp.map(s => ({
+    return sp.map((s) => ({
       ServiceId: s.ServiceId,
       Description: s.Description,
       IsDeleted: false
