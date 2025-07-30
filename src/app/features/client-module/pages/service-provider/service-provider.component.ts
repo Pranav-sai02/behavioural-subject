@@ -1,35 +1,35 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ServiceProviders } from '../../../service-provider/service-providers/models/ServiceProviders';
 import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { ServiceProvidersService } from '../../../service-provider/service-providers/services/service-providers/service-providers.service';
 import { ToastrService } from '../../../../shared/component/toastr/services/toastr.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { UnlinkCellRendererComponent } from '../../../../shared/component/unlink-cell-renderer/unlink-cell-renderer.component';
-import { ServiceProvidersStateService } from '../../../service-provider/service-providers/services/service-providers-state/service-providers-state.service';
+import { TabStateService } from '../../services/tabs-behavioural-service/tabState.service';
+import { ClientServiceProvider } from '../../models/Client';
+import { ServiceProvider } from '../../../service-provider/service-providers/models/ServiceProviders';
 
 @Component({
   selector: 'app-service-provider',
   standalone: false,
   templateUrl: './service-provider.component.html',
-  styleUrls: ['./service-provider.component.css'],
+  styleUrl: './service-provider.component.css',
 })
 export class ServiceProviderComponent implements OnInit, OnDestroy {
-  serviceProviders: ServiceProviders[] = [];
+  serviceProviders: ServiceProvider[] = [];
+  linkedProviders: (ClientServiceProvider & { ServiceProviderName?: string })[] = [];
   gridApi!: GridApi;
   form: FormGroup;
 
-  serviceProivderList: { id: string; name: string }[] = [];
+  serviceProviderList: { id: string; name: string }[] = [];
   UnlinkCellRendererComponent = UnlinkCellRendererComponent;
 
-  columnDefs: ColDef<ServiceProviders>[] = [
+  columnDefs: ColDef<ClientServiceProvider & { ServiceProviderName?: string }>[] = [
     {
-      field: 'Name',
+      field: 'ServiceProviderName',
       headerName: 'Service Provider',
       flex: 1,
       minWidth: 200,
-      cellStyle: {
-        borderRight: '1px solid #ccc',
-      },
+      cellStyle: { borderRight: '1px solid #ccc' },
       headerClass: 'bold-header',
     },
     {
@@ -39,7 +39,7 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
       maxWidth: 100,
       cellRenderer: 'unlinkCellRenderer',
       cellRendererParams: {
-        onUnlink: (data: ServiceProviders) => this.softDelete(data),
+        onUnlink: (data: ClientServiceProvider) => this.softDelete(data),
       },
       cellStyle: {
         borderRight: '1px solid #ccc',
@@ -63,7 +63,7 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
     private providerService: ServiceProvidersService,
     private toastrService: ToastrService,
     private fb: FormBuilder,
-    private stateService: ServiceProvidersStateService
+    private tabState: TabStateService
   ) {
     this.form = this.fb.group({
       selectedServiceProvider: [null],
@@ -73,9 +73,21 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadProviders();
 
-    this.stateService.linkedProviders$.subscribe((providers) => {
+    // Subscribe to the TabStateService for linked providers
+    this.tabState.getServiceProvider().subscribe((providers) => {
+      // Add ServiceProviderName for display
+      this.linkedProviders = providers.map((p) => {
+        const matchingProvider = this.serviceProviders.find(
+          (sp) => sp.ServiceProviderId === p.ServiceProviderId
+        );
+        return {
+          ...p,
+          ServiceProviderName: matchingProvider?.Name || '',
+        };
+      });
+
       if (this.gridApi) {
-        this.gridApi.setGridOption('rowData', providers);
+        this.gridApi.setGridOption('rowData', this.linkedProviders);
       }
     });
   }
@@ -84,7 +96,7 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
     this.providerService.getServiceProviders().subscribe({
       next: (data) => {
         this.serviceProviders = data;
-        this.serviceProivderList = data
+        this.serviceProviderList = data
           .filter((sp) => sp.IsActive)
           .map((sp) => ({
             id: sp.ServiceProviderId?.toString() || '',
@@ -103,26 +115,20 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
 
   onGridReady(event: GridReadyEvent): void {
     this.gridApi = event.api;
-
-    // Replace all data
-    const rowData = this.stateService.getLinkedProviders();
-    this.gridApi.setGridOption('rowData', rowData);
+    this.gridApi.setGridOption('rowData', this.linkedProviders);
   }
 
-  softDelete(provider: ServiceProviders): void {
+  softDelete(provider: ClientServiceProvider): void {
     const id = provider.ServiceProviderId;
     if (!id) return;
 
-    this.stateService.removeProvider(id); // Update state
+    const updatedList = this.linkedProviders.filter(
+      (p) => p.ServiceProviderId !== id
+    );
+    this.tabState.updateServiceProvider(updatedList);
+
     this.gridApi.applyTransaction({ remove: [provider] });
-
     this.toastrService.show('Item unlinked successfully', 'success');
-
-    this.providerService.softDeleteServiceProvider(id).subscribe({
-      error: () => {
-        this.toastrService.show('Failed to unlink item', 'error');
-      },
-    });
   }
 
   addServiceProviderToGrid(): void {
@@ -133,9 +139,9 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const alreadyAdded = this.stateService
-      .getLinkedProviders()
-      .some((sp) => sp.ServiceProviderId?.toString() === selectedId);
+    const alreadyAdded = this.linkedProviders.some(
+      (sp) => sp.ServiceProviderId?.toString() === selectedId
+    );
 
     if (alreadyAdded) {
       this.toastrService.show('Service provider already added.', 'info');
@@ -151,14 +157,17 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ✅ Keep only minimal fields required (e.g., up to TransferNumber)
-    const minimalProvider: ServiceProviders = {
-      ServiceProviderId: providerToAdd.ServiceProviderId,
-      Name: providerToAdd.Name,
-      TransferNumber: providerToAdd.TransferNumber || '',
-    } as unknown as ServiceProviders;
+    // Minimal payload (no ClientServiceProviderDto)
+    const newProvider: ClientServiceProvider & { ServiceProviderName?: string } = {
+      ClientServiceProviderId: 0,
+      ClientId: 0,
+      ServiceProviderId: providerToAdd.ServiceProviderId!,
+      //ServiceProviderName: providerToAdd.Name, // for UI only
+    };
 
-    this.stateService.addProvider(minimalProvider); // Update state
+    const updatedList = [...this.linkedProviders, newProvider];
+    this.tabState.updateServiceProvider(updatedList);
+
     this.form.get('selectedServiceProvider')?.reset();
     this.toastrService.show(`${providerToAdd.Name} added to grid`, 'success');
   }

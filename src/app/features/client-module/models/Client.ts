@@ -66,7 +66,7 @@ export interface ClientServiceProvider {
   ClientServiceProviderId: number;
   ClientId: number;
   ServiceProviderId: number;
-  ClientServiceProviderDto: ClientServiceProviderDto;
+  ClientServiceProviderDto?: ClientServiceProviderDto;
 }
 
 export interface ServiceDto {

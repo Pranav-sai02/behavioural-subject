@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ServiceProvidersService } from '../../services/service-providers/service-providers.service';
-import { ServiceProviders, ContactDetail } from '../../models/ServiceProviders';
+import { ServiceProvider, ContactDetail } from '../../models/ServiceProviders';
 
 import {
   CountryISO,
@@ -29,7 +29,7 @@ import { PROVINCES } from '../../../../../constants/provinces.constant';
   styleUrls: ['./service-providers-popup.component.css'],
 })
 export class ServiceProvidersPopupComponent implements OnInit {
-  @Input() providerData!: ServiceProviders | null;
+  @Input() providerData!: ServiceProvider | null;
   @Input() isEdit = false;
   @Output() close = new EventEmitter<void>();
   @Output() formSubmit = new EventEmitter<any>();

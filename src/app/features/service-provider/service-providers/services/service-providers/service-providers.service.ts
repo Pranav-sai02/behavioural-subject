@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ServiceProviders } from '../../models/ServiceProviders';
+import { ServiceProvider } from '../../models/ServiceProviders';
 import { catchError, Observable, throwError } from 'rxjs';
 import { API_ENDPOINTS } from '../../../../../constants/api-endpoints';
 import { ToastrService } from '../../../../../shared/component/toastr/services/toastr.service';
@@ -20,24 +20,24 @@ export class ServiceProvidersService {
     };
   }
 
-  getServiceProviders(): Observable<ServiceProviders[]> {
+  getServiceProviders(): Observable<ServiceProvider[]> {
     return this.http
-      .get<ServiceProviders[]>(this.apiUrl)
+      .get<ServiceProvider[]>(this.apiUrl)
       .pipe(catchError(this.handleError('fetching all services')));
   }
 
-  addServiceProvider(provider: ServiceProviders): Observable<ServiceProviders> {
+  addServiceProvider(provider: ServiceProvider): Observable<ServiceProvider> {
     return this.http
-      .post<ServiceProviders>(this.apiUrl, provider)
+      .post<ServiceProvider>(this.apiUrl, provider)
       .pipe(catchError(this.handleError(`creating serviceproviders`)));
   }
 
   updateServiceProvider(
     id: number,
-    data: ServiceProviders
-  ): Observable<ServiceProviders> {
+    data: ServiceProvider
+  ): Observable<ServiceProvider> {
     return this.http
-      .put<ServiceProviders>(`${this.apiUrl}/${id}`, data)
+      .put<ServiceProvider>(`${this.apiUrl}/${id}`, data)
       .pipe(catchError(this.handleError(`updating service provider ID ${id}`)));
   }
 
@@ -47,8 +47,8 @@ export class ServiceProvidersService {
       .pipe(catchError(this.handleError(`deleting service provider ID ${id}`)));
   }
 
-  softDeleteServiceProvider(id: number): Observable<ServiceProviders> {
-    return this.http.put<ServiceProviders>(`${this.apiUrl}/${id}/softdelete`, {
+  softDeleteServiceProvider(id: number): Observable<ServiceProvider> {
+    return this.http.put<ServiceProvider>(`${this.apiUrl}/${id}/softdelete`, {
       IsDelete: true,
     });
   }

@@ -9,7 +9,7 @@
     (ngSubmit)="addServiceProviderToGrid()"
   >
     <ng-select
-      [items]="serviceProivderList"
+      [items]="serviceProviderList"
       bindLabel="name"
       bindValue="id"
       formControlName="selectedServiceProvider"
@@ -38,7 +38,7 @@
 <div class="ag-theme-alpine">
   <ag-grid-angular
     class="ag-theme-alpine grid-full"
-    [rowData]="serviceProviders"
+    [rowData]="linkedProviders"
     [columnDefs]="columnDefs"
     [defaultColDef]="defaultColDef"
     [components]="{

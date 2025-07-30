@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
-import { ServiceProviders } from '../../models/ServiceProviders';
+import { ServiceProvider } from '../../models/ServiceProviders';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ServiceProvidersStateService {
-  private linkedProvidersSubject = new BehaviorSubject<ServiceProviders[]>([]);
+  private linkedProvidersSubject = new BehaviorSubject<ServiceProvider[]>([]);
   linkedProviders$ = this.linkedProvidersSubject.asObservable();
 
   constructor() {}
 
-  setLinkedProviders(providers: ServiceProviders[]): void {
+  setLinkedProviders(providers: ServiceProvider[]): void {
     this.linkedProvidersSubject.next(providers);
   }
 
-  getLinkedProviders(): ServiceProviders[] {
+  getLinkedProviders(): ServiceProvider[] {
     return this.linkedProvidersSubject.getValue();
   }
 
-  addProvider(provider: ServiceProviders): void {
+  addProvider(provider: ServiceProvider): void {
     const current = this.getLinkedProviders();
     this.linkedProvidersSubject.next([...current, provider]);
   }

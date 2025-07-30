@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ServiceProviders } from '../../models/ServiceProviders';
+import { ServiceProvider } from '../../models/ServiceProviders';
 import { ServiceProvidersService } from '../../services/service-providers/service-providers.service';
 import {
   CellClickedEvent,
@@ -24,11 +24,11 @@ export class ServiceProvidersComponent {
   SoftDeleteRendererComponent = SoftDeleteButtonRendererComponent;
   ViewButtonRendererComponent = ViewButtonRendererComponent;
 
-  selectedProvider: ServiceProviders | null = null;
+  selectedProvider: ServiceProvider | null = null;
   isEditMode = false;
   showPopup = false;
 
-  serviceProviders: ServiceProviders[] = [];
+  serviceProviders: ServiceProvider[] = [];
   gridApi!: GridApi;
 
   columnDefs: ColDef[] = [
@@ -422,13 +422,13 @@ export class ServiceProvidersComponent {
     this.gridApi.setGridOption('columnDefs', this.columnDefs);
   }
 
-  openPopup(rowData: ServiceProviders) {
+  openPopup(rowData: ServiceProvider) {
     this.selectedProvider = rowData;
     this.isEditMode = true;
     this.showPopup = true;
   }
 
-  handleFormSubmit(data: ServiceProviders) {
+  handleFormSubmit(data: ServiceProvider) {
     this.providerService.addServiceProvider(data).subscribe({
       next: (newProvider) => {
         console.log('New provider added:', newProvider);
@@ -453,7 +453,7 @@ export class ServiceProvidersComponent {
     });
   }
 
-  softDelete(row: ServiceProviders): void {
+  softDelete(row: ServiceProvider): void {
     // Optional: Update model locally (if needed for visual feedback or logging)
     row.IsDeleted = true;
 
