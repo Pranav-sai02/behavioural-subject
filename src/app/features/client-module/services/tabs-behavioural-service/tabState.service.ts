@@ -2,20 +2,20 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { 
-  Client, ClientService, ClientDocument, ClientClaimCentre, 
-  ClientClaimController, ClientServiceProvider, ClientRatingQuestion 
+  Client, ClientDocument, ClientClaimCentre, 
+  ClientClaimController, ClientService, 
+  ClientServiceProvider, ClientRatingQuestion 
 } from '../../models/Client';
 import { Tab } from '../../models/tabs.enum';
 
 @Injectable({ providedIn: 'root' })
 export class TabStateService {
- private _selectedTab$ = new BehaviorSubject<Tab>(Tab.Details);
+  private _selectedTab$ = new BehaviorSubject<Tab>(Tab.Details);
   readonly selectedTab$ = this._selectedTab$.asObservable();
 
-  // **Tab 7 (Company & Details via Accordions)**
-  private _details$ = new BehaviorSubject<Partial<Client>>({});
-
-  // **Tabs 1–6 (Collections)**
+  /** ---------------------
+   * Behavioral Tabs (1–6)
+   * --------------------- */
   private _services$        = new BehaviorSubject<ClientService[]>([]);
   private _ratingQs$        = new BehaviorSubject<ClientRatingQuestion[]>([]);
   private _documents$       = new BehaviorSubject<ClientDocument[]>([]);
@@ -24,60 +24,103 @@ export class TabStateService {
   private _claimController$ = new BehaviorSubject<ClientClaimController[]>([]);
 
   /** ---------------------
-   * Tab selection
+   * Accordion Data (7th Tab)
+   * --------------------- */
+  private _companyInfo$  = new BehaviorSubject<Partial<Client>>({});
+  private _claimInfo$    = new BehaviorSubject<Partial<Client>>({});
+  private _clientData$   = new BehaviorSubject<Partial<Client>>({});
+  private _customLabels$ = new BehaviorSubject<Partial<Client>>({});
+
+  /* ---------------------
+   * Tab Selection
    * --------------------- */
   setSelectedTab(tab: Tab): void {
     this._selectedTab$.next(tab);
   }
 
   /** ---------------------
-   * Getters (Observables)
+   * GETTERS for Observables
    * --------------------- */
-  getDetails()         { return this._details$.asObservable(); }
-  getServices()        { return this._services$.asObservable(); }
-  getRatingQuestions() { return this._ratingQs$.asObservable(); }
-  getDocuments()       { return this._documents$.asObservable(); }
-  getClaimCentre()     { return this._claimCentre$.asObservable(); }
-  getServiceProvider() { return this._serviceProv$.asObservable(); }
-  getClaimController() { return this._claimController$.asObservable(); }
-
-  /** ---------------------
-   * Updaters
-   * --------------------- */
-  updateDetails(details: Partial<Client>): void {
-    this._details$.next({ ...this._details$.value, ...details });
+  getServices(): Observable<ClientService[]> {
+    return this._services$.asObservable();
+  }
+  getRatingQuestions(): Observable<ClientRatingQuestion[]> {
+    return this._ratingQs$.asObservable();
+  }
+  getDocuments(): Observable<ClientDocument[]> {
+    return this._documents$.asObservable();
+  }
+  getClaimCentre(): Observable<ClientClaimCentre[]> {
+    return this._claimCentre$.asObservable();
+  }
+  getServiceProvider(): Observable<ClientServiceProvider[]> {
+    return this._serviceProv$.asObservable();
+  }
+  getClaimController(): Observable<ClientClaimController[]> {
+    return this._claimController$.asObservable();
   }
 
+  // Getters for Accordion Data
+  getCompanyInfo(): Observable<Partial<Client>> {
+    return this._companyInfo$.asObservable();
+  }
+  getClaimInfo(): Observable<Partial<Client>> {
+    return this._claimInfo$.asObservable();
+  }
+  getClientData(): Observable<Partial<Client>> {
+    return this._clientData$.asObservable();
+  }
+  getCustomLabels(): Observable<Partial<Client>> {
+    return this._customLabels$.asObservable();
+  }
+
+  /** ---------------------
+   * Updaters (Accordions)
+   * --------------------- */
+  updateCompanyInfo(info: Partial<Client>): void {
+    this._companyInfo$.next({ ...this._companyInfo$.value, ...info });
+  }
+  updateClaimInfo(info: Partial<Client>): void {
+    this._claimInfo$.next({ ...this._claimInfo$.value, ...info });
+  }
+  updateClientData(info: Partial<Client>): void {
+    this._clientData$.next({ ...this._clientData$.value, ...info });
+  }
+  updateCustomLabels(info: Partial<Client>): void {
+    this._customLabels$.next({ ...this._customLabels$.value, ...info });
+  }
+
+  /** ---------------------
+   * Updaters (Behavioral Tabs)
+   * --------------------- */
   updateServices(services: ClientService[]): void {
     this._services$.next([...services]);
   }
-
   updateRatingQuestions(ratingQs: ClientRatingQuestion[]): void {
     this._ratingQs$.next([...ratingQs]);
   }
-
   updateDocuments(docs: ClientDocument[]): void {
     this._documents$.next([...docs]);
   }
-
   updateClaimCentre(centres: ClientClaimCentre[]): void {
     this._claimCentre$.next([...centres]);
   }
-
   updateServiceProvider(providers: ClientServiceProvider[]): void {
     this._serviceProv$.next([...providers]);
   }
-
   updateClaimController(controllers: ClientClaimController[]): void {
     this._claimController$.next([...controllers]);
   }
 
   /** ---------------------
-   * Merge all state slices into a single Client object
+   * Merge all state slices into a single Client
    * --------------------- */
   gatherFullClient(): Observable<Client> {
     return forkJoin({
-      details: this._details$.pipe(take(1)),
+      company: this._companyInfo$.pipe(take(1)),
+      claim: this._claimInfo$.pipe(take(1)),
+      clientData: this._clientData$.pipe(take(1)),
+      customLabels: this._customLabels$.pipe(take(1)),
       services: this._services$.pipe(take(1)),
       ratingQs: this._ratingQs$.pipe(take(1)),
       documents: this._documents$.pipe(take(1)),
@@ -85,23 +128,34 @@ export class TabStateService {
       serviceProv: this._serviceProv$.pipe(take(1)),
       claimController: this._claimController$.pipe(take(1))
     }).pipe(
-      map(({ details, services, ratingQs, documents, claimCentre, serviceProv, claimController }) => {
-        const baseDetails = this.applyDefaults(details); // Add defaults for required fields
-        return {
-          ...baseDetails,
-          ClientService: services,
-          ClientRatingQuestion: ratingQs,
-          clientDocument: documents,
-          ClientClaimCentre: claimCentre,
-          ClientServiceProvider: serviceProv,
-          ClientClaimController: claimController
-        } as Client;
-      })
+      map(
+        ({
+          company, claim, clientData, customLabels,
+          services, ratingQs, documents, claimCentre,
+          serviceProv, claimController
+        }) => {
+          const details = this.applyDefaults({
+            ...company,
+            ...claim,
+            ...clientData,
+            ...customLabels
+          });
+          return {
+            ...details,
+            ClientService: services,
+            ClientRatingQuestion: ratingQs,
+            clientDocument: documents,
+            ClientClaimCentre: claimCentre,
+            ClientServiceProvider: serviceProv,
+            ClientClaimController: claimController
+          } as Client;
+        }
+      )
     );
   }
 
   /** ---------------------
-   * Default fallback for required fields
+   * Default fallback
    * --------------------- */
   private applyDefaults(details: Partial<Client>): Partial<Client> {
     return {
@@ -121,7 +175,10 @@ export class TabStateService {
    * Debugging Helper
    * --------------------- */
   logCurrentState(): void {
-    console.log('Details:', this._details$.value);
+    console.log('Company Info:', this._companyInfo$.value);
+    console.log('Claim Info:', this._claimInfo$.value);
+    console.log('Client Data:', this._clientData$.value);
+    console.log('Custom Labels:', this._customLabels$.value);
     console.log('Services:', this._services$.value);
     console.log('RatingQs:', this._ratingQs$.value);
     console.log('Documents:', this._documents$.value);

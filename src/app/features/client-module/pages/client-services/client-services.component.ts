@@ -104,7 +104,7 @@ export class ClientServicesComponent implements OnInit, OnDestroy {
 
   onGridReady(ev: GridReadyEvent): void {
     this.gridApi = ev.api;
-    (this.gridApi as any).setRowData(this.rows); // cast to any for compatibility
+    this.gridApi.setGridOption('rowData', this.rows); // cast to any for compatibility
   }
 
   softDelete(svc: ServiceRow): void {

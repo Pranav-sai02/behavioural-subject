@@ -5,6 +5,8 @@ import { DocumentsService } from '../../../documents/services/documents.service'
 import { SoftDeleteButtonRendererComponent } from '../../../../shared/component/soft-delete-button-renderer/soft-delete-button-renderer.component';
 import { FileLinkRendererComponent } from '../../../../shared/component/file-link-renderer/file-link-renderer.component';
 import { ToastrService } from '../../../../shared/component/toastr/services/toastr.service';
+import { TabStateService } from '../../services/tabs-behavioural-service/tabState.service';
+import { ClientDocument } from '../../models/Client';
 
 @Component({
   selector: 'app-documents',
@@ -86,22 +88,24 @@ export class DocumentsComponent {
 
   constructor(
     private documentService: DocumentsService,
-    private toastrService: ToastrService
-  ) {}
+    private toastrService: ToastrService,
+    private tabState: TabStateService
+  ) { }
 
   ngOnInit(): void {
-    this.loadServices();
+    this.loadDocuments();
   }
 
-  private loadServices(): void {
+  private loadDocuments(): void {
     this.documentService.getAll().subscribe({
       next: (data) => {
         this.rows = data;
+        this.pushToTabState(); // Update TabState with initial data
         setTimeout(() => this.autoSizeColumnsBasedOnContent(), 0);
       },
       error: (err) => {
-        console.error('Failed to load services:', err);
-        this.toastrService.show('Failed to load services. Try again.', 'error');
+        console.error('Failed to load documents:', err);
+        this.toastrService.show('Failed to load documents. Try again.', 'error');
       },
     });
   }
@@ -155,17 +159,41 @@ export class DocumentsComponent {
     this.gridApi.autoSizeColumns(columnsToAutoSize, false);
   }
 
-  softDelete(documents: Documents): void {
-    documents.IsDelete = true;
+  softDelete(document: Documents): void {
+    document.IsDelete = true;
     this.rows = this.rows.filter(
-      (doc) => doc.DocumentId !== documents.DocumentId
+      (doc) => doc.DocumentId !== document.DocumentId
     );
+    this.pushToTabState(); // Sync state after deletion
     this.toastrService.show('Removed successfully', 'success');
   }
 
   onServiceLinked(newDoc: Documents): void {
     this.rows.push(newDoc);
     this.rows = [...this.rows]; // trigger change detection
+    this.pushToTabState(); // Sync state after addition
     this.toastrService.show('Document linked successfully', 'success');
+  }
+
+  /** Pushes current documents to TabStateService */
+  private pushToTabState(): void {
+    const clientDocuments: ClientDocument[] = this.rows.map((doc) => ({
+      ClientDocumentId: 0, // default for new
+      DocumentId: doc.DocumentId,
+      ClientId: 0, // will be set in the final payload
+      Note: '',
+      FileData: '',
+      FileName: '',
+      ListRank: 0,
+      IsDeleted: doc.IsDelete || false,
+      Document: {
+        DocumentId: doc.DocumentId,
+        Description: doc.Description,
+        IsDelete: doc.IsDelete || false,
+        IsActive: true,
+      },
+    }));
+
+    this.tabState.updateDocuments(clientDocuments);
   }
 }

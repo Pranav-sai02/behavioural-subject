@@ -42,7 +42,11 @@ export class ClientPopupComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isEditMode && this.clientToEdit) {
-      this.tabState.updateDetails(this.clientToEdit);
+      // Pre-fill all accordions with existing data
+      this.tabState.updateCompanyInfo(this.clientToEdit);
+      this.tabState.updateClaimInfo(this.clientToEdit);
+      this.tabState.updateClientData(this.clientToEdit);
+      this.tabState.updateCustomLabels(this.clientToEdit);
     }
   }
 
@@ -64,61 +68,62 @@ export class ClientPopupComponent implements OnInit {
     this.close.emit();
   }
 
-  /** Prepares payload with safe defaults */
+  /** Prepare payload with safe defaults */
   private preparePayload(fullClient: Client): any {
-    return {
-      clientGroupId: fullClient.ClientGroupId || 1,
-      clientName: fullClient.ClientName?.trim() || 'Test Client',
-      doTextExport: fullClient.DoTextExport ?? true,
-      isActive: fullClient.IsActive ?? true,
-      nearestClaimCentre: fullClient.NearestClaimCentre ?? false,
-      policyLookup: fullClient.PolicyLookup ?? true,
-      processClaims: fullClient.ProcessClaims ?? true,
-      useMembershipNumber: fullClient.UseMembershipNumber ?? false,
-      validate: fullClient.Validate ?? true,
-      validationExternalFile: fullClient.ValidationExternalFile ?? false,
-      validationOther: fullClient.ValidationOther ?? false,
-      validationWeb: fullClient.ValidationWeb ?? true,
-      webValidationAVS: fullClient.WebValidationAVS ?? true,
-      webValidationOTH: fullClient.WebValidationOTH ?? false,
-      enableVoucherExportOnDeathClaim: fullClient.EnableVoucherExportOnDeathClaim ?? false,
+  return {
+    clientId: fullClient.ClientId || 0,
+    clientGroupId: fullClient.ClientGroupId || 1,
+    clientName: fullClient.ClientName?.trim() || '',
+    doTextExport: fullClient.DoTextExport ?? true,
+    isActive: fullClient.IsActive ?? true,
+    nearestClaimCentre: fullClient.NearestClaimCentre ?? false,
+    policyLookup: fullClient.PolicyLookup ?? true,
+    processClaims: fullClient.ProcessClaims ?? true,
+    useMembershipNumber: fullClient.UseMembershipNumber ?? false,
+    validate: fullClient.Validate ?? true,
+    validationExternalFile: fullClient.ValidationExternalFile ?? false,
+    validationOther: fullClient.ValidationOther ?? false,
+    validationWeb: fullClient.ValidationWeb ?? true,
+    webValidationAVS: fullClient.WebValidationAVS ?? true,
+    webValidationOTH: fullClient.WebValidationOTH ?? false,
+    enableVoucherExportOnDeathClaim: fullClient.EnableVoucherExportOnDeathClaim ?? false,
 
-      claimsManager: fullClient.ClaimsManager || 'Jane Smith',
-      address: fullClient.Address || '45 Baker Street, Johannesburg',
-      claimFormDeclaration: fullClient.ClaimFormDeclaration || 'This is a declaration.',
-      claimFormDeclarationPlain: fullClient.ClaimFormDeclarationPlain || 'Plain declaration text.',
-      code: fullClient.Code || 'D903',
-      companyLogo: fullClient.CompanyLogo || 'logo.png',
-      companyLogoData: fullClient.CompanyLogoData || null,
-      fax: fullClient.Fax || '011-555-1234',
-      mobile: fullClient.Mobile || '083-555-9876',
-      otherValidationNotes: fullClient.OtherValidationNotes || 'None',
-      policyFile: fullClient.PolicyFile || 'policy.pdf',
-      policyLabel: fullClient.PolicyLabel || 'Standard Policy',
-      policyLookupFileData: fullClient.PolicyLookupFileData || null,
-      policyLookupFileName: fullClient.PolicyLookupFileName || 'lookup.pdf',
-      policyLookupPath: fullClient.PolicyLookupPath || '/docs/policy',
-      printName: fullClient.PrintName || fullClient.ClientName || 'Delta Inc',
-      tel: fullClient.Tel || '011-111-1111',
+    claimsManager: fullClient.ClaimsManager || '',
+    address: fullClient.Address || '',
+    claimFormDeclaration: fullClient.ClaimFormDeclaration || '',
+    claimFormDeclarationPlain: fullClient.ClaimFormDeclarationPlain || '',
+    code: fullClient.Code || '',
+    companyLogo: fullClient.CompanyLogo || '',
+    companyLogoData: fullClient.CompanyLogoData || null,
+    fax: fullClient.Fax || '',
+    mobile: fullClient.Mobile || '',
+    otherValidationNotes: fullClient.OtherValidationNotes || '',
+    policyFile: fullClient.PolicyFile || '',
+    policyLabel: fullClient.PolicyLabel || '',
+    policyLookupFileData: fullClient.PolicyLookupFileData || null,
+    policyLookupFileName: fullClient.PolicyLookupFileName || '',
+    policyLookupPath: fullClient.PolicyLookupPath || '',
+    printName: fullClient.PrintName || fullClient.ClientName || '',
+    tel: fullClient.Tel || '',
 
-      validationLabel1: fullClient.ValidationLabel1 || 'Label 1',
-      validationLabel2: fullClient.ValidationLabel2 || 'Label 2',
-      validationLabel3: fullClient.ValidationLabel3 || 'Label 3',
-      validationLabel4: fullClient.ValidationLabel4 || 'Label 4',
-      validationLabel5: fullClient.ValidationLabel5 || 'Label 5',
-      validationLabel6: fullClient.ValidationLabel6 || 'null',
+    validationLabel1: fullClient.ValidationLabel1 || '',
+    validationLabel2: fullClient.ValidationLabel2 || '',
+    validationLabel3: fullClient.ValidationLabel3 || '',
+    validationLabel4: fullClient.ValidationLabel4 || '',
+    validationLabel5: fullClient.ValidationLabel5 || '',
+    validationLabel6: fullClient.ValidationLabel6 || '',
 
-      webURL: fullClient.WebURL || 'https://delta.com',
-      webValidationURL: fullClient.WebValidationURL || 'https://delta.com/validate',
+    webURL: fullClient.WebURL || '',
+    webValidationURL: fullClient.WebValidationURL || '',
 
-      clientServiceProvider: fullClient.ClientServiceProvider || [],
-      clientService: fullClient.ClientService || [],
-      clientRatingQuestion: fullClient.ClientRatingQuestion || [],
-      clientDocument: fullClient.clientDocument || [],
-      clientClaimController: fullClient.ClientClaimController || [],
-      clientClaimCentre: fullClient.ClientClaimCentre || []
-    };
-  }
+    clientServiceProvider: fullClient.ClientServiceProvider || [],
+    clientService: fullClient.ClientService || [],
+    clientRatingQuestion: fullClient.ClientRatingQuestion || [],
+    clientDocument: fullClient.clientDocument || [],
+    clientClaimController: fullClient.ClientClaimController || [],
+    clientClaimCentre: fullClient.ClientClaimCentre || []
+  };
+}
 
   save(): void {
     this.tabState.gatherFullClient().subscribe((fullClient: Client) => {
@@ -128,7 +133,7 @@ export class ClientPopupComponent implements OnInit {
       console.log('Final payload:', payload);
 
       const request$ = this.isEditMode
-        ? this.clientService.updateClient(payload.ClientId, payload)
+        ? this.clientService.updateClient(payload.clientId, payload)
         : this.clientService.createClient(payload);
 
       request$.subscribe({

@@ -1,22 +1,17 @@
 <div class="accordion-wrapper">
   <mat-accordion>
-    <!-- <div class="modal-backdrop"> -->
-    <!-- <div class="modal-content"> -->
-
     <mat-expansion-panel class="full-bg-panel" [expanded]="false">
       <mat-expansion-panel-header>
         <mat-panel-title>Company Information</mat-panel-title>
       </mat-expansion-panel-header>
 
-      <!-- Success Popup -->
       <div class="success-popup" *ngIf="showSuccess">
         <span>Client saved successfully</span>
       </div>
 
-      <!-- 👇 Add a scrollable wrapper for content -->
       <div class="accordion-scroll-container">
-        <!-- Client Form -->
-        <form [formGroup]="clientForm" (ngSubmit)="onSave()">
+        <!-- Removed (ngSubmit)="onSave()" since universal save is used -->
+        <form [formGroup]="clientForm">
           <div class="form-row">
             <div class="form-group input-container full-width">
               <label>Company Name <span class="required">*</span></label>
@@ -29,18 +24,12 @@
                 class="clear-icon"
                 *ngIf="clientForm.get('CompanyName')?.value"
                 (click)="clearField('CompanyName')"
-                >✕</span
               >
-              <div
-                class="error-messages"
-                *ngIf="
-                  clientForm.get('CompanyName')?.touched &&
-                  clientForm.get('CompanyName')?.invalid
-                "
-              >
-                <small
-                  *ngIf="clientForm.get('CompanyName')?.errors?.['required']"
-                >
+                ✕
+              </span>
+              <div class="error-messages"
+                   *ngIf="clientForm.get('CompanyName')?.touched && clientForm.get('CompanyName')?.invalid">
+                <small *ngIf="clientForm.get('CompanyName')?.errors?.['required']">
                   Company Name is required
                 </small>
               </div>
@@ -63,17 +52,11 @@
                   <div class="option-box">{{ item.Name }}</div>
                 </ng-template>
               </ng-select>
-              <div
-                class="error-messages"
-                *ngIf="
-                  clientForm.get('ClientGroup')?.touched &&
-                  clientForm.get('ClientGroup')?.invalid
-                "
-              >
-                <small
-                  *ngIf="clientForm.get('ClientGroup')?.errors?.['required']"
-                  >Client Group is required</small
-                >
+              <div class="error-messages"
+                   *ngIf="clientForm.get('ClientGroupId')?.touched && clientForm.get('ClientGroupId')?.invalid">
+                <small *ngIf="clientForm.get('ClientGroupId')?.errors?.['required']">
+                  Client Group is required
+                </small>
               </div>
             </div>
           </div>
@@ -82,138 +65,89 @@
           <div class="form-row">
             <div class="form-group input-container full-width">
               <label>Address</label>
-              <textarea
-                formControlName="Address"
-                placeholder="Enter Address"
-                rows="3"
-              ></textarea>
+              <textarea formControlName="Address" placeholder="Enter Address" rows="3"></textarea>
             </div>
           </div>
 
           <!-- Telephone -->
           <div class="client-form-country">
+            <!-- Telephone input -->
             <div class="form-row">
               <div class="form-group input-container full-width">
                 <label>Telephone <span class="required">*</span></label>
                 <ngx-intl-tel-input
                   [cssClass]="'custom'"
-                  [preferredCountries]="[
-                    CountryISO.UnitedStates,
-                    CountryISO.UnitedKingdom
-                  ]"
+                  [preferredCountries]="preferredCountries"
                   [enablePlaceholder]="true"
                   [searchCountryFlag]="true"
                   [separateDialCode]="true"
                   [searchCountryField]="searchFields"
-                  [selectFirstCountry]="false"
                   [selectedCountryISO]="CountryISO.SouthAfrica"
                   [phoneValidation]="true"
-                  name="Telephone"
                   formControlName="Telephone"
                 ></ngx-intl-tel-input>
-
-                <div
-                  class="error-messages"
-                  *ngIf="
-                    clientForm.get('Telephone')?.touched &&
-                    clientForm.get('Telephone')?.invalid
-                  "
-                >
-                  <small
-                    *ngIf="clientForm.get('Telephone')?.errors?.['required']"
-                    >Telephone is required</small
-                  >
-                  <small
-                    *ngIf="clientForm.get('Telephone')?.errors?.['pattern']"
-                    >Enter a valid number</small
-                  >
+                <div class="error-messages"
+                     *ngIf="clientForm.get('Telephone')?.touched && clientForm.get('Telephone')?.invalid">
+                  <small *ngIf="clientForm.get('Telephone')?.errors?.['required']">
+                    Telephone is required
+                  </small>
                 </div>
               </div>
             </div>
 
+            <!-- Mobile -->
             <div class="form-row">
               <div class="form-group input-container">
                 <label>Mobile Number <span class="required">*</span></label>
                 <ngx-intl-tel-input
                   [cssClass]="'custom'"
-                  [preferredCountries]="[
-                    CountryISO.SouthAfrica,
-                    CountryISO.UnitedKingdom
-                  ]"
+                  [preferredCountries]="preferredCountries"
                   [enablePlaceholder]="true"
                   [searchCountryFlag]="true"
                   [separateDialCode]="true"
                   [searchCountryField]="searchFields"
-                  [selectFirstCountry]="false"
                   [selectedCountryISO]="CountryISO.SouthAfrica"
                   [phoneValidation]="true"
-                  name="Mobile"
                   formControlName="Mobile"
                 ></ngx-intl-tel-input>
-
-                <div
-                  class="error-messages"
-                  *ngIf="
-                    clientForm.get('Mobile')?.touched &&
-                    clientForm.get('Mobile')?.invalid
-                  "
-                >
-                  <small *ngIf="clientForm.get('Mobile')?.errors?.['required']"
-                    >Mobile Number is required</small
-                  >
-                  <small *ngIf="clientForm.get('Mobile')?.errors?.['pattern']"
-                    >Enter a valid 10-digit number</small
-                  >
+                <div class="error-messages"
+                     *ngIf="clientForm.get('Mobile')?.touched && clientForm.get('Mobile')?.invalid">
+                  <small *ngIf="clientForm.get('Mobile')?.errors?.['required']">
+                    Mobile Number is required
+                  </small>
                 </div>
               </div>
             </div>
 
+            <!-- Fax -->
             <div class="form-row">
               <div class="form-group input-container">
                 <label>Fax</label>
                 <ngx-intl-tel-input
                   [cssClass]="'custom'"
-                  [preferredCountries]="[
-                    CountryISO.UnitedStates,
-                    CountryISO.UnitedKingdom
-                  ]"
+                  [preferredCountries]="preferredCountries"
                   [enablePlaceholder]="true"
                   [searchCountryFlag]="true"
                   [separateDialCode]="true"
                   [searchCountryField]="searchFields"
-                  [selectFirstCountry]="false"
                   [selectedCountryISO]="CountryISO.SouthAfrica"
-                  [maxLength]="10"
                   [phoneValidation]="true"
-                  name="fax"
                   formControlName="Fax"
-                >
-                </ngx-intl-tel-input>
+                ></ngx-intl-tel-input>
               </div>
             </div>
           </div>
 
+          <!-- Web URL -->
           <div class="form-row">
             <div class="form-group input-container full-width">
               <label>Web URL</label>
-              <input
-                type="text"
-                formControlName="WebURL"
-                placeholder="Enter Web URL"
-              />
-              <span
-                class="clear-icon"
-                *ngIf="clientForm.get('WebURL')?.value"
-                (click)="clearField('WebURL')"
-                >✕</span
-              >
-              <div
-                class="error-messages"
-                *ngIf="
-                  clientForm.get('WebURL')?.touched &&
-                  clientForm.get('WebURL')?.invalid
-                "
-              >
+              <input type="text" formControlName="WebURL" placeholder="Enter Web URL" />
+              <span class="clear-icon"
+                    *ngIf="clientForm.get('WebURL')?.value"
+                    (click)="clearField('WebURL')">✕</span>
+              <div class="error-messages"
+                   *ngIf="clientForm.get('WebURL')?.touched && clientForm.get('WebURL')?.invalid">
                 <small *ngIf="clientForm.get('WebURL')?.errors?.['pattern']">
                   Enter a valid URL
                 </small>
@@ -221,6 +155,7 @@
             </div>
           </div>
 
+          <!-- Company Logo -->
           <div class="form-row">
             <div class="form-group input-container full-width">
               <label>Company Logo</label>
@@ -233,25 +168,9 @@
                 [clearable]="true"
                 [(ngModel)]="selectedValue"
                 class="custom-select-style"
-              >
-              </ng-select>
+              ></ng-select>
             </div>
           </div>
-
-          <!-- Checkboxes -->
-          <!-- <div class="checkbox-row1">
-            <div class="form-group is-active-group">
-              <label class="toggle-label">IsActive?</label>
-              <label class="toggle-switch">
-                <input type="checkbox" formControlName="IsActive" />
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div> -->
-
-          <!-- Submit Button -->
-
-          <!-- <button type="submit">Save</button> -->
         </form>
       </div>
     </mat-expansion-panel>
