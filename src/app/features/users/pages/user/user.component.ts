@@ -204,11 +204,11 @@ export class UserComponent implements OnInit {
     this.saving = true;
     this.userService.updateUser(this.editedUser).subscribe({
       next: (updated) => {
-        const index = this.users.findIndex((u) => u.Id === updated.Id);
+        const index = this.users.findIndex((u) => u.AspNetUserId === updated.AspNetUserId);
         if (index > -1) this.users[index] = { ...updated };
 
         const rowNode = this.gridApi.getRowNode(
-          updated.Id?.toString() ?? updated.UserName
+          updated.AspNetUserId?.toString() ?? updated.UserName
         );
         rowNode?.setData(updated);
 
@@ -233,11 +233,11 @@ export class UserComponent implements OnInit {
     if (!confirmed) return;
 
     // Remove from local array
-    this.users = this.users.filter((u) => u.Id !== user.Id);
+    this.users = this.users.filter((u) => u.AspNetUserId !== user.AspNetUserId);
 
     // Remove from grid
     const rowNode = this.gridApi.getRowNode(
-      user.Id?.toString() ?? user.UserEmail
+      user.AspNetUserId?.toString() ?? user.UserEmail
     );
     if (rowNode) {
       this.gridApi.applyTransaction({ remove: [rowNode.data] });

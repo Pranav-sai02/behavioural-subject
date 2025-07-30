@@ -180,9 +180,9 @@ export class ServiceProvidersPopupComponent implements OnInit {
     this.userService.getAllUsers().subscribe({
       next: (users: User[]) => {
         const formattedUsers = users
-          .filter((user) => user.IsActive && user.Id !== undefined) //    This line is selecting only active users who have an Id
+          .filter((user) => user.IsActive && user.AspNetUserId !== undefined) //    This line is selecting only active users who have an Id
           .map((user) => ({
-            id: user.Id!,
+            id: user.AspNetUserId!,
             name: `${user.Firstname} ${user.Lastname}`,
           }));
 

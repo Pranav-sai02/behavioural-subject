@@ -20,7 +20,7 @@ export class UserService {
   }
 
   updateUser(user: User): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/${user.Id}`, user).pipe(
+    return this.http.put<User>(`${this.apiUrl}/${user.AspNetUserId}`, user).pipe(
       catchError(error => this.handleError(error, 'updateUser'))
     );
   }

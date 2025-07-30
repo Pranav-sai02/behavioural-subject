@@ -91,7 +91,7 @@ export interface RatingQuestionType {
 export interface RatingQuestion {
   RatingQuestionId: number;
   RatingQuestionTypeId: number;
-  RatingQuestionType: RatingQuestionType;
+  RatingQuestionType?: RatingQuestionType;
   Question: string;
   IsActive: boolean;
   ListRank: number;
@@ -103,7 +103,7 @@ export interface ClientRatingQuestion {
   RatingQuestionId: number;
   ListRank: number;
   IsDeleted: boolean;
-  RatingQuestion: RatingQuestion;
+  RatingQuestion?: RatingQuestion;
 }
 
 export interface DocumentDto {

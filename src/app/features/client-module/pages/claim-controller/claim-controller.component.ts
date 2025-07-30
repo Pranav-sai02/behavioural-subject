@@ -148,7 +148,7 @@ export class ClaimControllerComponent implements OnInit {
         this.allUsers = data.filter((u) => u.IsActive && !u.IsDeleted); // ✅ Filter only active users
 
         this.claimcontroller = this.allUsers.map((u) => ({
-          id: u.Id?.toString() ?? '',
+          id: u.AspNetUserId?.toString() ?? '',
           name: `${u.Firstname} ${u.Lastname}`,
         }));
 
@@ -178,7 +178,7 @@ export class ClaimControllerComponent implements OnInit {
     );
     if (!confirmed) return;
 
-    const rowNode = this.gridApi.getRowNode(user.Id?.toString() ?? '');
+    const rowNode = this.gridApi.getRowNode(user.AspNetUserId?.toString() ?? '');
     if (rowNode) {
       this.gridApi.applyTransaction({ remove: [rowNode.data] });
       this.toastr.show(`Deleted ${user.UserEmail} from UI.`, 'success');
@@ -234,7 +234,7 @@ export class ClaimControllerComponent implements OnInit {
     }
 
     const alreadyAdded = this.users.some(
-      (u) => u.Id?.toString() === selectedId
+      (u) => u.AspNetUserId?.toString() === selectedId
     );
     if (alreadyAdded) {
       this.toastr.show('Controller already added.', 'info');
@@ -242,7 +242,7 @@ export class ClaimControllerComponent implements OnInit {
     }
 
     const userToAdd = this.allUsers.find(
-      (u) => u.Id?.toString() === selectedId
+      (u) => u.AspNetUserId?.toString() === selectedId
     );
     if (!userToAdd) {
       this.toastr.show('User not found.', 'error');
@@ -261,13 +261,13 @@ export class ClaimControllerComponent implements OnInit {
   }
 
   unlinkController(user: User): void {
-    const rowNode = this.gridApi.getRowNode(user.Id?.toString() ?? '');
+    const rowNode = this.gridApi.getRowNode(user.AspNetUserId?.toString() ?? '');
     if (rowNode) {
       // ❗ Remove from AG Grid
       this.gridApi.applyTransaction({ remove: [rowNode.data] });
 
       // ❗ Also remove from local array
-      this.users = this.users.filter((u) => u.Id !== user.Id);
+      this.users = this.users.filter((u) => u.AspNetUserId !== user.AspNetUserId);
 
       this.toastr.show(`${user.Firstname} unlinked successfully.`, 'success');
     }
@@ -277,7 +277,7 @@ export class ClaimControllerComponent implements OnInit {
     user.IsDeleted = true;
 
     // ✅ Step 1: Update the linkedServiceProviders array
-    this.allUsers = this.allUsers.filter((sp) => sp.Id !== user.Id);
+    this.allUsers = this.allUsers.filter((sp) => sp.AspNetUserId !== user.AspNetUserId);
 
     // ✅ Step 2: Remove from AG Grid UI
     this.gridApi.applyTransaction({ remove: [user] });
@@ -286,7 +286,7 @@ export class ClaimControllerComponent implements OnInit {
     this.toastr.show('Item unlinked successfully', 'success');
 
     // ✅ Step 3: Call backend to soft delete
-    this.userService.softDelete(user.Id!).subscribe({
+    this.userService.softDelete(user.AspNetUserId!).subscribe({
       next: () => {},
       error: () => {
         this.toastr.show('Failed to unlink item', 'error');

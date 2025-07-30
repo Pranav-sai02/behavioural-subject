@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ServiceProviders } from '../../../service-provider/service-providers/models/ServiceProviders';
 import { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
-import { SoftDeleteButtonRendererComponent } from '../../../../shared/component/soft-delete-button-renderer/soft-delete-button-renderer.component';
 import { ServiceProvidersService } from '../../../service-provider/service-providers/services/service-providers/service-providers.service';
 import { ToastrService } from '../../../../shared/component/toastr/services/toastr.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -12,7 +11,7 @@ import { ServiceProvidersStateService } from '../../../service-provider/service-
   selector: 'app-service-provider',
   standalone: false,
   templateUrl: './service-provider.component.html',
-  styleUrl: './service-provider.component.css',
+  styleUrls: ['./service-provider.component.css'],
 })
 export class ServiceProviderComponent implements OnInit, OnDestroy {
   serviceProviders: ServiceProviders[] = [];
@@ -20,7 +19,6 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
   form: FormGroup;
 
   serviceProivderList: { id: string; name: string }[] = [];
-
   UnlinkCellRendererComponent = UnlinkCellRendererComponent;
 
   columnDefs: ColDef<ServiceProviders>[] = [
@@ -65,7 +63,7 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
     private providerService: ServiceProvidersService,
     private toastrService: ToastrService,
     private fb: FormBuilder,
-    private stateService: ServiceProvidersStateService // ✅ Inject state service
+    private stateService: ServiceProvidersStateService
   ) {
     this.form = this.fb.group({
       selectedServiceProvider: [null],
@@ -115,8 +113,7 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
     const id = provider.ServiceProviderId;
     if (!id) return;
 
-    this.stateService.removeProvider(id); // ✅ Update state
-
+    this.stateService.removeProvider(id); // Update state
     this.gridApi.applyTransaction({ remove: [provider] });
 
     this.toastrService.show('Item unlinked successfully', 'success');
@@ -154,12 +151,19 @@ export class ServiceProviderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.stateService.addProvider(providerToAdd); // ✅ Update state
+    // ✅ Keep only minimal fields required (e.g., up to TransferNumber)
+    const minimalProvider: ServiceProviders = {
+      ServiceProviderId: providerToAdd.ServiceProviderId,
+      Name: providerToAdd.Name,
+      TransferNumber: providerToAdd.TransferNumber || '',
+    } as unknown as ServiceProviders;
+
+    this.stateService.addProvider(minimalProvider); // Update state
     this.form.get('selectedServiceProvider')?.reset();
     this.toastrService.show(`${providerToAdd.Name} added to grid`, 'success');
   }
 
   ngOnDestroy(): void {
-    // Optional: persist to localStorage or server if needed
+    // Optional cleanup logic
   }
 }

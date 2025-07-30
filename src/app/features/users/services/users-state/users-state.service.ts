@@ -25,7 +25,7 @@ export class UsersStateService {
   }
 
   removeUser(userId: number): void {
-    const current = this.getUsers().filter((u) => u.Id !== userId);
+    const current = this.getUsers().filter((u) => u.AspNetUserId !== userId);
     this.usersSubject.next(current);
   }
 
